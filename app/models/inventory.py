@@ -14,10 +14,7 @@ class Inventory(Base):
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     
-    # Define the relationship with Product
     product = relationship("Product", back_populates="inventory")
-    
-    # Define the relationship with InventoryHistory
     history = relationship("InventoryHistory", back_populates="inventory")
 
 class InventoryHistory(Base):

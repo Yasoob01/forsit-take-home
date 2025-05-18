@@ -17,12 +17,10 @@ def get_inventory_by_product(db: Session, product_id: int):
     return db.query(models.Inventory).filter(models.Inventory.product_id == product_id).first()
 
 def create_inventory(db: Session, inventory: schemas.InventoryCreate):
-    # Check if inventory for this product already exists
     db_inventory = get_inventory_by_product(db, product_id=inventory.product_id)
     if db_inventory:
         raise HTTPException(status_code=400, detail="Inventory for this product already exists")
     
-    # Check if product exists
     product = db.query(models.Product).filter(models.Product.id == inventory.product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -36,7 +34,6 @@ def create_inventory(db: Session, inventory: schemas.InventoryCreate):
 def update_inventory(db: Session, product_id: int, inventory: schemas.InventoryUpdate, change_reason: Optional[str] = None):
     db_inventory = get_inventory_by_product(db, product_id=product_id)
     
-    # Create inventory history record if quantity is changing
     if inventory.quantity is not None and inventory.quantity != db_inventory.quantity:
         history = models.InventoryHistory(
             inventory_id=db_inventory.id,
@@ -46,11 +43,9 @@ def update_inventory(db: Session, product_id: int, inventory: schemas.InventoryU
         )
         db.add(history)
         
-        # Update last_restock_date if quantity is increasing
         if inventory.quantity > db_inventory.quantity:
             db_inventory.last_restock_date = datetime.now()
     
-    # Update inventory fields
     update_data = inventory.dict(exclude_unset=True)
     for key, value in update_data.items():
         setattr(db_inventory, key, value)

@@ -15,7 +15,6 @@ def get_products(db: Session, skip: int = 0, limit: int = 100, category_id: int 
     return query.offset(skip).limit(limit).all()
 
 def create_product(db: Session, product: schemas.ProductCreate):
-    # Check if product with same SKU already exists
     db_product = get_product_by_sku(db, sku=product.sku)
     if db_product:
         raise HTTPException(status_code=400, detail="Product with this SKU already exists")
@@ -44,7 +43,6 @@ def delete_product(db: Session, product_id: int):
     db.commit()
     return db_product
 
-# Category functions
 def get_category(db: Session, category_id: int):
     return db.query(models.Category).filter(models.Category.id == category_id).first()
 

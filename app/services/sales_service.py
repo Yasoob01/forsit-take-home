@@ -211,7 +211,6 @@ def get_revenue_by_period(db: Session,
             models.Product.category_id == category_id
         )
     
-    # Group by period and execute query
     query = query.group_by(date_part).order_by(date_part)
     result = query.all()
     
@@ -235,7 +234,7 @@ def compare_revenue(db: Session,
     """
     Compare revenue between two periods
     """
-    # Set default dates if not provided
+
     if not current_end:
         current_end = datetime.now()
     
@@ -246,7 +245,7 @@ def compare_revenue(db: Session,
             current_start = current_end - timedelta(days=7)
         elif period_type == "monthly":
             current_start = current_end - timedelta(days=30)
-        else:  # yearly
+        else:
             current_start = current_end - timedelta(days=365)
     
     if not previous_end:
@@ -259,24 +258,21 @@ def compare_revenue(db: Session,
             previous_start = previous_end - timedelta(days=7)
         elif period_type == "monthly":
             previous_start = previous_end - timedelta(days=30)
-        else:  # yearly
+        else:
             previous_start = previous_end - timedelta(days=365)
-    
-    # Get current period revenue
+
     current_query = db.query(
         func.sum(models.Sale.total_amount).label("revenue")
     ).filter(
         models.Sale.order_date.between(current_start, current_end)
     )
-    
-    # Get previous period revenue
+
     previous_query = db.query(
         func.sum(models.Sale.total_amount).label("revenue")
     ).filter(
         models.Sale.order_date.between(previous_start, previous_end)
     )
     
-    # Add filters for platform and category if provided
     if platform:
         current_query = current_query.filter(models.Sale.platform == platform)
         previous_query = previous_query.filter(models.Sale.platform == platform)
@@ -300,8 +296,7 @@ def compare_revenue(db: Session,
     
     current_revenue = current_query.scalar() or 0
     previous_revenue = previous_query.scalar() or 0
-    
-    # Calculate change
+
     change = current_revenue - previous_revenue
     percent_change = (change / previous_revenue * 100) if previous_revenue > 0 else 0
     
