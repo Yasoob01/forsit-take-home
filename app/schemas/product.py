@@ -26,5 +26,4 @@ class Product(ProductBase):
 
     class Config:
         orm_mode = True
-        # For Pydantic V2 compatibility
         from_attributes = True

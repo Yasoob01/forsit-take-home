@@ -31,6 +31,5 @@ class InventoryHistory(Base):
     change_reason = Column(String(200), nullable=True)
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    
-    # Define the relationship with Inventory
+
     inventory = relationship("Inventory", back_populates="history")

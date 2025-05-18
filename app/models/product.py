@@ -15,11 +15,6 @@ class Product(Base):
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
     
-    # Define the relationship with Category
     category = relationship("Category", back_populates="products")
-    
-    # Define the relationship with Inventory
     inventory = relationship("Inventory", back_populates="product", uselist=False)
-    
-    # Define the relationship with SaleItem
     sale_items = relationship("SaleItem", back_populates="product")

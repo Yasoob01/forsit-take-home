@@ -13,8 +13,7 @@ class Sale(Base):
     total_amount = Column(Float, nullable=False)
     platform = Column(String(50), index=True)
     status = Column(String(20), default="pending")
-    
-    # Define the relationship with SaleItem
+
     items = relationship("SaleItem", back_populates="sale")
 
 class SaleItem(Base):
@@ -27,8 +26,5 @@ class SaleItem(Base):
     unit_price = Column(Float, nullable=False)
     subtotal = Column(Float, nullable=False)
     
-    # Define the relationship with Sale
     sale = relationship("Sale", back_populates="items")
-    
-    # Define the relationship with Product
     product = relationship("Product", back_populates="sale_items")
