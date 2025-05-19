@@ -13,6 +13,8 @@ class Sale(Base):
     total_amount = Column(Float, nullable=False)
     platform = Column(String(50), index=True)
     status = Column(String(20), default="pending")
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
 
     items = relationship("SaleItem", back_populates="sale")
 
@@ -25,6 +27,7 @@ class SaleItem(Base):
     quantity = Column(Integer, nullable=False)
     unit_price = Column(Float, nullable=False)
     subtotal = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=datetime.now)
     
     sale = relationship("Sale", back_populates="items")
     product = relationship("Product", back_populates="sale_items")

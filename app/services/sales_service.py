@@ -57,7 +57,6 @@ def create_sale(db: Session, sale: schemas.SaleCreate):
     db.add(db_sale)
     db.flush()
     
-    # Create sale items
     for item in sale.items:
         db_item = models.SaleItem(
             sale_id=db_sale.id,
@@ -68,7 +67,6 @@ def create_sale(db: Session, sale: schemas.SaleCreate):
         )
         db.add(db_item)
         
-        # Update inventory
         inventory = db.query(models.Inventory).filter(models.Inventory.product_id == item.product_id).first()
         if inventory:
             inventory.quantity = max(0, inventory.quantity - item.quantity)
@@ -87,8 +85,7 @@ def get_sales_summary(db: Session,
         start_date = datetime.now() - timedelta(days=30)
     if not end_date:
         end_date = datetime.now()
-    
-    # Total sales and revenue
+
     sales_query = db.query(
         func.count(models.Sale.id).label("total_orders"),
         func.sum(models.Sale.total_amount).label("total_revenue")
@@ -99,8 +96,7 @@ def get_sales_summary(db: Session,
     total_orders = sales_query.total_orders or 0
     total_revenue = float(sales_query.total_revenue or 0)
     average_order_value = total_revenue / total_orders if total_orders > 0 else 0
-    
-    # Sales by platform
+
     platform_query = db.query(
         models.Sale.platform,
         func.count(models.Sale.id).label("order_count"),
@@ -109,7 +105,6 @@ def get_sales_summary(db: Session,
         models.Sale.order_date.between(start_date, end_date)
     ).group_by(models.Sale.platform).all()
     
-    # Top selling products
     top_products_query = db.query(
         models.Product.id,
         models.Product.name,
@@ -151,7 +146,6 @@ def get_sales_summary(db: Session,
                 "total_revenue": float(p.total_revenue or 0)
             } for p in top_products_query
         ],
-        # Add these fields to match what your schema expects
         "total_sales": total_revenue,
         "total_orders": total_orders,
         "average_order_value": average_order_value
@@ -178,8 +172,6 @@ def get_revenue_by_period(db: Session,
     
     if not end_date:
         end_date = datetime.now()
-    
-    # Define the date part to extract based on period type
     if period_type == "daily":
         date_part = func.date(models.Sale.order_date)
     elif period_type == "weekly":
@@ -188,8 +180,7 @@ def get_revenue_by_period(db: Session,
         date_part = func.date_trunc('month', models.Sale.order_date)
     else:  # yearly
         date_part = extract('year', models.Sale.order_date)
-    
-    # Build the query
+
     query = db.query(
         date_part.label("period"),
         func.sum(models.Sale.total_amount).label("revenue"),
@@ -198,7 +189,6 @@ def get_revenue_by_period(db: Session,
         models.Sale.order_date.between(start_date, end_date)
     )
     
-    # Add filters for platform and category if provided
     if platform:
         query = query.filter(models.Sale.platform == platform)
     
@@ -213,8 +203,7 @@ def get_revenue_by_period(db: Session,
     
     query = query.group_by(date_part).order_by(date_part)
     result = query.all()
-    
-    # Return just the data list instead of a dictionary
+
     return [
         {
             "period": str(item.period),
